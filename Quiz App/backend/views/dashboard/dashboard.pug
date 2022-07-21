@@ -1,0 +1,117 @@
+extends ../layout/layout
+
+block dashboardSidebar
+     li.nav-item.active
+            a(href='/account/dashboard')
+              p Dashboard
+     li.nav-item
+            a(href='/account/quiz')
+              p Start Quiz
+
+block content
+    .main-panel
+      .content
+        .panel-header.bg-danger-gradient
+          .page-inner
+            #userIdDashboard(style='display:none') #{session.user._id}
+            .d-flex.align-items-left.align-items-md-center.flex-column.flex-md-row
+              div
+                h2.text-white.pb-2.fw-bold Dashboard
+              .ml-md-auto.py-2.py-md-0
+                a.btn.btn-secondary.btn-round(href='/account/quiz') Start Quiz
+        .page-inner
+          .row.d-flex.justify-content-center
+            .col-sm-6.col-lg-3.mx-5
+              .card.p-3
+                .d-flex.align-items-center
+                  span.stamp.stamp-md.bg-secondary.mr-3
+                    i.fa.fa-dollar-sign
+                  div
+                    h5.mb-1
+                      b
+                          #highestPoint  132
+                            small point
+                    small.text-muted Your Highest point
+            .col-sm-6.col-lg-3.mx-5
+              .card.p-3
+                .d-flex.align-items-center
+                  span.stamp.stamp-md.bg-success.mr-3
+                  div
+                    h5.mb-1
+                      b
+                          #numberOfExamGiven  78
+                    small.text-muted Your total attempts
+
+        .page-inner
+          .row
+            .col-md-12
+              .page-title(style='text-align:center') Timeline
+              ul.timeline
+                li
+                  .timeline-badge.danger
+                    i.flaticon-error
+                  .timeline-panel
+                    .timeline-heading
+                      h4.timeline-title Sign Up
+                      p
+                        small.text-muted
+                          i.flaticon-message
+                          |  First step
+                    .timeline-body
+                      p
+                        | It important to register first otherwise your point will we not displayed
+                li.timeline-inverted
+                  .timeline-badge.warning
+                    i.flaticon-alarm-1
+                  .timeline-panel
+                    .timeline-heading
+                      h4.timeline-title If already Sign In then just Login
+                    .timeline-body
+                      p
+                        | It helps us to know the current user
+                li
+                  .timeline-badge
+                    i.flaticon-message
+                  .timeline-panel
+                    .timeline-heading
+                      h4.timeline-title Start your quiz
+                    .timeline-body
+                      p
+                        | Quiz contains 10 questions of mathematics
+                li.timeline-inverted
+                  .timeline-badge
+                    i.flaticon-message
+                  .timeline-panel
+                    .timeline-heading
+                      h4.timeline-title After quiz ends
+                    .timeline-body
+                      p
+                        | You will be displayed your result
+
+block pageScript
+  script(src='/assets/js/core/jquery.3.2.1.min.js')
+  script(src='/assets/js/core/popper.min.js')
+  script(src='/assets/js/core/bootstrap.min.js')
+  // jQuery UI
+  script(src='/assets/js/plugin/jquery-ui-1.12.1.custom/jquery-ui.min.js')
+  script(src='/assets/js/plugin/jquery-ui-touch-punch/jquery.ui.touch-punch.min.js')
+  // jQuery Scrollbar
+  script(src='/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js')
+  // Atlantis JS
+  script(src='/assets/js/atlantis.min.js')
+  // Atlantis DEMO methods, don't include it in your project!
+  script(src='/assets/js/setting-demo2.js')
+  script.
+   $(document).ready(function() {
+        var user = document.getElementById('userIdDashboard').innerHTML.trim()
+        $.ajax({
+              type: "POST",
+              url: "/account/getscore",
+              data:{userId : user},
+              success: function(result) {
+                  if(result.type==='success'){
+                    $('#highestPoint').html(result.highestscore)
+                    $('#numberOfExamGiven').html(result.totalattempt)
+                  }
+         }});
+   });

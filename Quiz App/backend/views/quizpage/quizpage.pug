@@ -1,0 +1,224 @@
+extends ../layout/layout
+
+block userSidebar
+     li.nav-item
+            a(href='/account/dashboard')
+              p Dashboard
+     li.nav-item.active
+            a(href='/account/quiz')
+              p Start Quiz
+
+block content
+    .main-panel
+      .container.mt-0
+        .page-inner
+          .page-header
+            h4.page-title Quizz
+          .row
+            .col-md-12
+              .card
+                .card-header.d-flex.justify-content-between
+                  .card-title Mathematics Questions
+                  button#submitBtn.btn.btn-primary(onclick=`getResult()`) Submit
+                .card-body
+                  #userId(style='display:none') #{session.user._id}
+                  .row
+                    .main-div(style='display:flex;flex-direction:column;height:50vh;font-size:24px;font-weight:700;padding:5px;width:100%' )
+                      #question_div(style='flex:0.4') Q.1 hello ?
+                      .option_div(style='flex:0.6;display:flex;flex-direction:column;justify-content:space-between;')
+                          .options12_div(style='display:flex;width:95%;margin-top:10px;')
+                                .option1(style='flex:0.5;display:flex;cursor:pointer;' onMouseOver="this.style.color='red'" onMouseOut="this.style.color='black'") option A :
+                                     span#option1  hello 1
+                                .option2(style='margin-left:10vw; flex:0.5;cursor:pointer' onMouseOver="this.style.color='red'" onMouseOut="this.style.color='black'") option B :
+                                     span#option2  hello 2
+                          .options34_div(style='display:flex;width:95%;margin-bottom:10px')
+                                  .option3(style='flex:0.5;cursor:pointer' onMouseOver="this.style.color='red'" onMouseOut="this.style.color='black'") option C :
+                                    span#option3 hello 3
+                                  .option4(style='margin-left:10vw; flex:0.5;cursor:pointer' onMouseOver="this.style.color='red'" onMouseOut="this.style.color='black'") option D :
+                                    span#option4 hello 4
+                    #solution_div(style='margin-top:10px;overflow-wrap:break-word;font-size:18px;font-weight:300;height:20vh;overflow:scroll;display:none') solution
+                .card-action(style='display:flex;justify-content:space-between')
+                  button#previouBtn.btn.btn-danger(onclick=`getPrevQuestion()`) Previous
+                  button#nextBtn.btn.btn-success(onclick=`getNextQuestion()`) Next
+
+block pageScript
+  script(src='/assets/js/core/jquery.3.2.1.min.js')
+  script(src='/assets/js/core/popper.min.js')
+  script(src='/assets/js/core/bootstrap.min.js')
+  // jQuery UI
+  script(src='/assets/js/plugin/jquery-ui-1.12.1.custom/jquery-ui.min.js')
+  script(src='/assets/js/plugin/jquery-ui-touch-punch/jquery.ui.touch-punch.min.js')
+  // jQuery Scrollbar
+  script(src='/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js')
+  // Datatables
+  script(src='/assets/js/plugin/datatables/datatables.min.js')
+  // Atlantis JS
+  script(src='/assets/js/atlantis.min.js')
+  // Atlantis DEMO methods, don't include it in your project!
+  script(src='/assets/js/setting-demo2.js')
+  // SweetAlert
+  script(src='https://cdn.jsdelivr.net/npm/sweetalert2@11.4.17/dist/sweetalert2.all.min.js')
+  script(src='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js')
+  script.
+
+    var correctAnsArray = [];
+    var selectedAnsArray = [];
+    var index =-1;
+    var quesNo = 1;
+
+     $(document).ready(function() {
+                   $.ajax({
+                        type: "GET",
+                        url: "/account/questions?number=1",
+                        success: function(result) {
+                            if(result.type==='success'){
+                              console.log(result.data)
+                              $('#question_div').html("Q."+result.data.SrNo+")   "+result.data.Question)
+                              $('#option1').html(result.data.CorrectAnswer1)
+                              correctAnsArray[++index]=result.data.CorrectAnswer1;
+                              $('.option1').val(result.data.CorrectAnswer1)
+                              console.log($('.option1').val())
+                              $('#option2').html(result.data.WrongAnswer1)
+                              $('#option3').html(result.data.WrongAnswer2)
+                              $('#option4').html(result.data.WrongAnswer3)
+                              $('#solution_div').html(result.data.Solution)
+                              $('#previouBtn').prop('disabled', true);
+                            }else{
+                                  Swal.fire({
+                                  title: `Error : User password not found`,
+                                })
+                            }
+                        }});
+
+       });
+
+       var answer="";
+        $("span").click(function(){
+          $("span").css("background-color","white")
+          $(this).css("background-color","red")
+          selectedAnsArray[index]=  $(this).html();
+          console.log(correctAnsArray)
+          console.log(selectedAnsArray)
+        });
+
+       function getNextQuestion(){
+         if(quesNo==10) return;
+          $.ajax({
+                        type: "GET",
+                        url: `/account/questions?number=${++quesNo}`,
+                        success: function(result) {
+                            if(result.type==='success'){
+                              console.log(result.data)
+                              $('#question_div').html("Q."+result.data.SrNo+")   "+result.data.Question)
+                              $('#option1').html(result.data.CorrectAnswer1)
+                              correctAnsArray[++index]=result.data.CorrectAnswer1;
+                              $('.option1').val(result.data.CorrectAnswer1)
+                              $('#option2').html(result.data.WrongAnswer1)
+                              $('#option3').html(result.data.WrongAnswer2)
+                              $('#option4').html(result.data.WrongAnswer3)
+                              $('#solution_div').html(result.data.Solution)
+                              if(quesNo>1) $('#previouBtn').prop('disabled', false);
+                              if(quesNo==10) $('#nextBtn').prop('disabled', true);
+                            }else{
+                                  Swal.fire({
+                                  title: `Error : User password not found`,
+                                })
+                            }
+                        }});
+
+       }
+
+       function getPrevQuestion(){
+         if(quesNo==1) return;
+          $.ajax({
+                        type: "GET",
+                        url: `/account/questions?number=${--quesNo}`,
+                        success: function(result) {
+                            if(result.type==='success'){
+                              console.log(result.data)
+                              $('#question_div').html("Q."+result.data.SrNo+")   "+result.data.Question)
+                              $('#option1').html(result.data.CorrectAnswer1)
+                              correctAnsArray[++index]=result.data.CorrectAnswer1;
+                              $('.option1').val(result.data.CorrectAnswer1)
+                              $('#option2').html(result.data.WrongAnswer1)
+                              $('#option3').html(result.data.WrongAnswer2)
+                              $('#option4').html(result.data.WrongAnswer3)
+                              $('#solution_div').html(result.data.Solution)
+                              if(quesNo==1) $('#previouBtn').prop('disabled', true);
+                              if(quesNo<10) $('#nextBtn').prop('disabled', false);
+                            }else{
+                                  Swal.fire({
+                                  title: `Error : User password not found`,
+                                })
+                            }
+                        }});
+
+       }
+
+       function getResult(){
+        var score = 0;
+        if(!selectedAnsArray.length){
+          return Alert("solve atleast 1 question",'error',score)
+        }
+        selectedAnsArray.map((data,index)=>{
+          if(data==correctAnsArray[index]) score+=1;
+        })
+        if(selectedAnsArray.length<9){
+          var selectedOpt = "";
+          selectedAnsArray.map((data,index)=>{
+            selectedOpt += "Q."+(index+1)+")  "+data;
+          })
+          return Alert("solve all 10 question <br><br>Selected Option : <br>"+selectedOpt,'error',score)
+        }
+        Alert("your score : "+score+"/"+selectedAnsArray.length,'success',score)
+       }
+
+        function Alert(show,iconSign,score){
+            var SweetAlert2Demo2 = function() {
+                  //== Demos
+                  var initDemos = function() {
+                      Swal.fire({
+                                icon: iconSign,
+                                html: show,
+                                confirmButtonText: 'Show Solutions ',
+                                showCancelButton: true
+                              }).then((result)=>{
+                                if(result.isConfirmed){
+                                  if(selectedAnsArray.length==10){
+                                      $('#solution_div').css('display','block')
+                                      var userId = document.getElementById("userId").innerHTML.trim()
+                                      $.ajax({
+                                              type: "POST",
+                                              url: `/account/submit`,
+                                              data: {currentscore: score, userId : userId},
+                                              success: function(result) {
+                                                  if(result.type==='success'){
+                                                    return;
+                                                  }else{
+                                                        Swal.fire({
+                                                        title: `Error : User password not found`,
+                                                      })
+                                                  }
+                                        }});
+                                  }else{
+                                    return Alert("Solve all 10 qquestion",'error')
+                                  }
+                                }
+                                return ;
+                              })
+                  };
+                  return {
+                      //== Init
+                      init: function() {
+                      initDemos();
+                      },
+                  };
+              }();
+
+
+                 //== Class Initialization
+              jQuery(document).ready(function() {
+                  SweetAlert2Demo2.init();
+              });
+          }
+
