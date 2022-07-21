@@ -2,7 +2,7 @@
 
 # dependencies
 /backend/node_modules
-/backend/variables.env
+/variables.env
 
 # testing
 /coverage
